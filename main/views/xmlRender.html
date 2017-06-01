@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<textarea></textarea>
+<span class="j-btn">start</span>
+<span class="j-save">save</span>
+<script src="/introduce/jQuery-3.1.1.js"></script>
+<script>
+    var str='';
+    $('.j-btn').click(function(){
+        $.post('/logging_data/resolveXml',function(data){
+            //console.log(JSON.parse(data.result));
+           // $('textarea').text(data.result);
+            str=JSON.parse(data.result);
+            alert('解析成功');
+        });
+    });
+    $('.j-save').click(function(){
+
+        $.post('/logging_data/add',{"listBar":JSON.stringify(str)},function(data){
+            //console.log(JSON.parse(data.result));
+            // $('textarea').text(data.result);
+            alert('存入成功');
+        });
+    });
+</script>
+</body>
+</html>

@@ -1,0 +1,9 @@
+module.exports={
+	part:2000,
+	session:{
+		secret:'word',
+		key:'word',
+		maxAge:1000*60*60*6
+	},
+	mongodb:'mongodb://localhost:27017/word'
+};
