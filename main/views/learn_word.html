@@ -1,0 +1,238 @@
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title><%= title %></title>
+    <script src="/introduce/view_adapter.js"></script>
+    <link href="/css/learn_word.css" type="text/css" rel="stylesheet">
+</head>
+<body>
+<div class="word-head j-word-head"></div>
+<div class="j-time"></div>
+<div class="word-progress j-word-progress">
+    <div class="progress-bar j-bar"></div>
+</div>
+<div class="word-content j-word-content">
+</div>
+<div class="footer-btn"><span class="btn j-not-know">不认识</span><span class="btn j-know">下一个</span></div>
+<script src="/introduce/jQuery-3.1.1.js"></script>
+<script src="/js/tool.js"></script>
+<script>
+    jQuery(function ($) {
+        var allWords = [];//存放当前所有单词数据
+        var currentNum = 1;//当前渲染第几个单词
+        var unKnowWords = [];//不认识的单词集合
+        var cdTime=5;//每个单词持续的时间(s)
+
+        var downTime = {
+            cdTime: 5,
+            timer: -1,
+            opt: {},
+            nowTime: '',
+            overTime: 0,
+            start: function () {
+                var _this = this;
+                _this.progress();
+                _this.timer = setInterval(function () {
+                    _this.progress();
+                }, 1000)
+            },
+            pause: function () {
+                var _this = this;
+                clearInterval(_this.timer);
+            },
+            stop: function () {
+                var _this = this;
+                clearInterval(_this.timer);
+                _this._doCallback(_this.opt.endCall);
+            },
+            progress: function () {
+                var _this = this;
+                if (_this.cdTime == 0) {
+                    _this.stop();
+                } else {
+                    _this.nowTime = _this.cdTime;
+                    _this._doCallback(_this.opt.startCall);
+                    _this.cdTime--;
+                    ++_this.overTime;
+
+                }
+            },
+            rest: function (opt) {
+                var _this = this;
+                _this.opt = opt;
+                clearInterval(_this.timer);
+                _this.cdTime = _this.opt.cdTime || 5;
+                _this.overTime = 0;
+                _this.start();
+            },
+            //判断并执行回调
+            _doCallback: function (callback) {
+                if (callback && $.isFunction(callback)) {
+                    callback(this);
+                }
+            }
+        };
+//进度条
+        var progress = function (dom, time) {
+            this.bar = dom;
+            this.allTime = time;//总时间
+            this.progressNum = 0;//当前时间进度
+            this.timer = '';
+            this.interval = 26;//时间间隔(ms)
+        };
+        progress.prototype = {
+            start: function (callback1,callback2) {
+                var _this = this;
+                var addNum = _this.interval / 1000;
+                auto();
+                _this.timer = setInterval(auto, _this.interval);
+                function auto() {
+
+                    if (_this.progressNum >= _this.allTime) {
+                        _this.stop();
+                        callback2(_this);
+                    } else {
+                        _this.progressNum += addNum;
+                        _this.bar.css('width', (_this.progressNum * 100 / _this.allTime) + '%');
+                        callback1(_this);
+                    }
+                }
+            },
+            rest:function(){
+                var _this=this;
+                _this.stop();
+                _this.bar.css('width', 0);
+                _this.progressNum = 0;
+            },
+            pause: function () {
+            },
+            stop: function () {
+                var _this = this;
+                clearInterval(_this.timer);
+            },
+            progressIng: function () {
+            }
+        };
+        var progress1=new progress($('.j-word-progress .j-bar'),cdTime);
+        var learnWord = {
+            init: function () {
+                this.getList();
+                this.bindEvent();
+            },
+            getList: function () {
+                var _this = this;
+                $.post('/learn_word/all_list_word', function (data) {
+                    console.log(data);
+                    if (data.code == 200) {
+                        allWords = data.result;
+                        _this.renderCurrentWord();
+                    } else {
+                        alert('获取数据失败');
+                    }
+                });
+            },
+            renderCurrentWord: function () {
+                var _this=this;
+                //渲染单词
+                var currentWord = allWords[currentNum - 1];
+                var headStr = '<h3 class="word-name j-word-name">' + currentWord["head-word"].attribute.search + '</h3>' +
+                        '<p class="word-pron">' + currentWord["head-word"].pron + '</p>';
+                $('.j-word-head').html(headStr);
+                console.log(currentWord);
+                //渲染释义
+                var wordContent = '<h4 class="word">' + currentWord["head-word"].word.replace(/\|/ig, "&nbsp") + '</h4><ul class="main">';
+                var senseNum = 0;
+                $.each(currentWord.sense, function (idx, obj) {
+                    senseNum++;
+                    var mean_cn = (obj.tran == undefined ? '_' : obj.tran);
+                    var mean_en = (obj.def == undefined ? "_" : obj.def["_"]);
+
+                    wordContent +=
+                            '<li class="sense"> ' +
+                            '<div class="title-num">' + senseNum + '.</div> ' +
+                            '<section class="content-txt"> ' +
+                            '<p class="mean-bar">' + mean_cn + '</p> ' +
+                            '<p class="mean-bar">' + mean_en + '</p> ';
+                    if (obj.example != undefined && obj.example.length > 0) {
+                        var exampleNum = 0;
+                        $.each(obj.example, function (idx1, obj1) {
+                            exampleNum++;
+                            wordContent += '<div class="example"> <div class="title-num">例' + exampleNum + ':</div> ' +
+                                    '<section class="content-txt"> ' +
+                                    '<p class="example-">'+obj1.tran+'</p> ' +
+                                    '<p>'+obj1.ex+'</p> </section> ' +
+                                    '</div> ';
+                        });
+                    }
+                    wordContent += '</section> </li>';
+                });
+                wordContent += '</ul>';
+                $('.j-word-content').html(wordContent);
+                //开启定时器
+                _this.startTime();
+            },
+            nextWord: function () {
+                var _this = this;
+                currentNum++;
+                $('.j-word-content').hide();
+                $('.j-not-know').removeClass('disable');
+                //重置进度条
+                progress1.rest();
+                if (currentNum >= (allWords.length + 1)) {
+                    alert('over');
+                } else {
+                    _this.renderCurrentWord();
+                }
+            },
+            startTime: function () {
+                //开启每个单词作答时间
+                var _this = this;
+                progress1.start(function(obj){
+                    //进行中
+                },function(obj){
+                    //结束 显示单词释义
+                    _this.unKnow();
+                });
+                //时间显示
+                /*downTime.rest({
+                    cdTime: GdownTime,
+                    startCall: function (obj) {
+                        $('.j-time').text(obj.nowTime + '秒');
+
+                        $('.j-word-progress .j-bar').css('width',((1-(obj.nowTime/GdownTime))*100)+'%');
+
+                    },
+                    endCall: function (obj) {
+
+                    }
+                });*/
+            },
+            unKnow:function(){
+                $('.j-not-know').addClass('disable');
+                var unKnowWord = $('.j-word-name').text().trim();
+                if($.inArray( unKnowWord, unKnowWords )==-1){
+                    unKnowWords.push(unKnowWord);
+                }
+                $('.j-word-content').fadeIn();
+            },
+            bindEvent: function () {
+                var _this = this;
+                $('.j-know').on('click', function () {
+                    //我会
+                    _this.nextWord();
+                });
+                $('.j-not-know').bind('click', function () {
+                    //我不会
+                    if($(this).hasClass('disable')){
+                        return false;
+                    }
+                    progress1.stop();
+                  _this.unKnow();
+                });
+            }
+        };
+        learnWord.init();
+    });
+</script>
+</body>
+</html>

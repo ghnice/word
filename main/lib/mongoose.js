@@ -30,17 +30,19 @@ exports.user = mongoose.model('user', userSchema);
 var collinsSchema = new mongoose.Schema({
     "attribute": {"word-type": String},
     "head-word": {"attribute": {"search": String}, "word": String, "pron": String},
+    "variant": {"attribute": {"search": String}, "word": String, "pron": String},
     "inflection": [String],
+    "boxx":{"note":{"_":String,"c":[String]},"tran":String},
     "sense": [{
         "attribute": {"id": String},
         "posp": String,
         "hdgr": String,
         "def": {"_": String, "c": String},
         "tran": String,
-        "example": {
+        "example": [{
             "ex": String,
             "tran": String
-        }
+        }]
     }]
 
 

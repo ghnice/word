@@ -33,6 +33,7 @@ app.use(session({
 app.use('/',require('./routes/index'));
 /*app.use('/word',require('./routes/word'));*/
 app.use('/logging_data',require('./routes/logging_data'));
+app.use('/learn_word',require('./routes/learn_word'));
 
 app.listen(config.part,function(){
 	console.log('已启动'+new Date());

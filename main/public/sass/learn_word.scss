@@ -1,0 +1,81 @@
+h1, h2, h3, h4, h5, h6 {
+  margin: 0;
+  padding: 0;
+}
+
+ul, ol {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-size: .12rem;
+  margin:0;
+}
+
+.word-head {
+  text-align: center;
+  .word-name {
+    font-size: .36rem;
+    color: #717171;
+  }
+  .word-pron {
+    font-size: .26rem;
+    color: #7e7e7e;
+  }
+}
+
+.footer-btn {
+  position: fixed;
+  bottom: .1rem;
+  left: 0;
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  .btn {
+    font-size: .36rem;
+    padding: .08rem;
+    border: .01rem solid green;
+    display: inline-block;
+  }
+}
+
+.word-content {
+  display: none;
+  .word{
+    font-size:.36rem;
+  }
+  .main {
+    .sense {
+      display: flex;
+      .title-num {
+        width: .4rem;
+        font-size:.26rem;
+      }
+      .content-txt {
+        overflow: hidden;
+        flex: 1;
+        .mean-bar {
+          font-size:.26rem;
+          margin:0 0 .06rem 0;
+        }
+        .example {
+          display: flex;
+          .title-num{
+            width:.54rem;
+          }
+        }
+      }
+    }
+  }
+}
+.word-progress{
+  width:100%;
+  height:.02rem;
+  .progress-bar {
+    height:100%;
+    width:0;
+    background-color:red;
+  }
+}
