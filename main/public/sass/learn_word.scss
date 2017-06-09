@@ -11,71 +11,197 @@ ul, ol {
 
 body {
   font-size: .12rem;
-  margin:0;
+  margin: 0;
+  background-color:#f7f7f7;
+  font-family: "Helvetica Neue",Helvetica,Arial,"Microsoft Yahei","Hiragino Sans GB","Heiti SC","WenQuanYi Micro Hei",sans-serif;;
+}
+
+$yellow: rgb(240, 173, 78);
+$red: rgb(251, 107, 91);
+$dark: rgb(46, 62, 78);
+$darkDeep:#25313e;
+$redDeep:#fa5542;
+$txt:#717171;
+/*按钮*/
+@mixin btn {
+  display: inline-block;
+  padding: 0.24rem .40rem;
+  font-size: .22rem;
+  font-weight: normal;
+  text-align: center;
+  white-space: nowrap;
+  vertical-align: middle;
+  cursor: pointer;
+  background-image: none;
+  border: 0.01rem solid transparent;
+  border-radius: 0.04rem;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  -o-user-select: none;
+  user-select: none;
+}
+
+.btn-md {
+  font-size: .14rem;
+  min-width: 1.2rem;
+  line-height: 1.42857143;
+}
+
+.btn-sm {
+  padding: 0.05rem .1rem;
+  font-size: .12rem;
+  line-height: 1;
+  border-radius: 0.02rem;
+}
+
+.btn:active, .btn.active {
+  background-image: none;
+  outline: 0;
+  -webkit-box-shadow: inset 0 0.03rem 0.05rem rgba(0, 0, 0, 0.125);
+  box-shadow: inset 0 0.03rem 0.05rem rgba(0, 0, 0, 0.125);
+}
+
+.btn-round {
+  border-radius: 100px;
+}
+
+$default: #444359;
+$defaultBg: #fafafa;
+@mixin btn-setting($color,$bgColor,$borderColor,$shadowColor,$borderBottomColor) {
+  color: $color !important;
+  background-color: $bgColor;
+  border-color: $borderColor;
+  box-shadow: 0 0.1rem 0.1rem $shadowColor;
+  border-bottom-color: $borderBottomColor !important;
+  &:hover, &:focus, &:active {
+  /*  background-color: #ed9c28;
+    border-color: #d58512;*/
+  }
+}
+
+.btn-red {
+  @include btn;
+  @include btn-setting(#ffffff, #fb6b5b, #fb6b5b, rgba(90, 90, 90, 0.1),rgba(45,44,65,0.3));
+}
+
+.btn-dark {
+  @include btn;
+  @include btn-setting(#ffffff, #2e3e4e, #2e3e4e, rgba(90, 90, 90, 0.1),rgba(45,44,65,0.3));
+}
+.btn-yellow{
+  @include btn;
+  @include btn-setting(#ffffff, f0ad4e, #eea236, rgba(90, 90, 90, 0.1),rgba(45,44,65,0.3));
+}
+.disable{
+  opacity: 0.6;
 }
 
 .word-head {
+  background-color:$darkDeep;
   text-align: center;
+  padding:.8rem .1rem;
+
   .word-name {
-    font-size: .36rem;
-    color: #717171;
+    font-size: .86rem;
+    color: $red;
+
   }
   .word-pron {
     font-size: .26rem;
-    color: #7e7e7e;
+    color: #f7f7f7;
   }
 }
 
 .footer-btn {
   position: fixed;
-  bottom: .1rem;
+  bottom: 0;
   left: 0;
   width: 100%;
   display: flex;
   justify-content: space-between;
-  .btn {
-    font-size: .36rem;
-    padding: .08rem;
-    border: .01rem solid green;
-    display: inline-block;
+  z-index: 1000;
+  background-color: #fff;
+  .btn-red{
+    flex:1.5;
+    border-radius: 0;
+    padding:.28rem 0;
+    font-size:.26rem;
+  }
+  .btn-dark{
+    flex:1;
+    border-radius: 0;
+    padding:.28rem 0;
+    font-size:.26rem;
   }
 }
 
 .word-content {
   display: none;
-  .word{
-    font-size:.36rem;
+  margin: 0 auto;
+  width: 90%;
+  .word-header{
+    font-size: .36rem;
+    padding:.2rem 0;
+    color:$darkDeep;
+    .word-group-0{
+      background-color:$dark ;
+    }
+    .word-group-1{
+      background-color:$yellow ;
+    }
+    .word-group{
+      color:#f7f7f7;
+      padding:.01rem .2rem;
+    }
+    .word-group:first-child{
+      border-radius: .03rem 0 0 .03rem;
+    }
+    .word-group:last-child{
+      border-radius:0 .03rem .03rem 0;
+    }
   }
   .main {
+    box-shadow: 0 0 .02rem rgba(0, 0, 0, .012);
+    padding: .16rem .1rem;
+    border-radius: .04rem;
+    background-color:#fff;
     .sense {
       display: flex;
       .title-num {
         width: .4rem;
-        font-size:.26rem;
+        font-size: .26rem;
+        color:$txt;
       }
       .content-txt {
         overflow: hidden;
         flex: 1;
         .mean-bar {
-          font-size:.26rem;
-          margin:0 0 .06rem 0;
+          font-size: .28rem;
+          margin: 0 0 .06rem 0;
+          font-weight: normal;
+          color:$txt;
         }
         .example {
+          color:$txt;
           display: flex;
-          .title-num{
-            width:.54rem;
+          .title-num {
+            width: .54rem;
           }
         }
       }
     }
   }
 }
-.word-progress{
-  width:100%;
-  height:.02rem;
+
+.word-progress {
+  width: 100%;
+  height: .03rem;
+  position:relative;
+  top:-.03rem;
   .progress-bar {
-    height:100%;
-    width:0;
-    background-color:red;
+    height: 100%;
+    width: 0;
+    background-color: $red;
   }
 }

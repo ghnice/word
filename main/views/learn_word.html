@@ -13,8 +13,10 @@
 </div>
 <div class="word-content j-word-content">
 </div>
-<div class="footer-btn"><span class="btn j-not-know">不认识</span><span class="btn j-know">下一个</span></div>
+<div class="footer-btn"><span class="btn-red j-not-know">不认识</span><span class="j-know btn-dark">下一个</span></div>
 <audio id="player" src="">您的浏览器不支持h5 audio,建议升级您的浏览器</audio>
+
+
 <script src="/introduce/jQuery-3.1.1.js"></script>
 <script src="/js/tool.js"></script>
 <script>
@@ -22,16 +24,11 @@
         var allWords = [];//存放当前所有单词数据
         var currentNum = 1;//当前渲染第几个单词
         var unKnowWords = [];//不认识的单词集合
-        var cdTime=5;//每个单词持续的时间(s)
-
-
-
-        
-
+        var cdTime = 2;//每个单词持续的时间(s)
         var wordPlayer = new player({
             dom: $('#player')
         });
-        var progressBar=new progress($('.j-word-progress .j-bar'),cdTime);
+        var progressBar = new progress($('.j-word-progress .j-bar'), cdTime);
         var learnWord = {
             init: function () {
                 this.getList();
@@ -50,15 +47,28 @@
                 });
             },
             renderCurrentWord: function () {
-                var _this=this;
+                var _this = this;
                 //渲染单词
                 var currentWord = allWords[currentNum - 1];
-                var wordPron=(currentWord["head-word"].pron==undefined?"sorry  尚无音标":currentWord["head-word"].pron+'<span class="j-play-word" word="' + currentWord["head-word"].attribute.search + '">播放</span>');
-                var headStr = '<h3 class="word-name j-word-name">' + currentWord["head-word"].attribute.search + '</h3>' +
-                        '<p class="word-pron">' +wordPron+ '</p>';
+                var wordName = currentWord["head-word"].attribute.search;
+                var wordPron = (currentWord["head-word"].pron == undefined ? "sorry  尚无音标" : currentWord["head-word"].pron + '<span class="j-play-word" word="' + wordName + '">播放</span>');
+                var headStr = '<h3 class="word-name j-word-name">' + wordName + '</h3>' +
+                        '<p class="word-pron">' + wordPron + '</p>';
                 $('.j-word-head').html(headStr);
                 //渲染释义
-                var wordContent = '<h4 class="word">' + currentWord["head-word"].word.replace(/\|/ig, "&nbsp") + '</h4><ul class="main">';
+                var contentWordAry = currentWord["head-word"].word.split('|');
+                var wordStr = '';
+                console.log(contentWordAry);
+                if (contentWordAry.length == 1) {
+                    wordStr = contentWordAry[0];
+                } else {
+                    for (var i = 0; i < contentWordAry.length; i++) {
+                        var count = i % 2;
+                        wordStr += '<b class="word-group word-group-' + count + '">' + contentWordAry[i] + '</b>';
+                    }
+                }
+
+                var wordContent = '<h4 class="word-header">' + wordStr + '</h4><ul class="main">';
                 var senseNum = 0;
                 $.each(currentWord.sense, function (idx, obj) {
                     senseNum++;
@@ -68,7 +78,7 @@
                     wordContent +=
                             '<li class="sense"> ' +
                             '<div class="title-num">' + senseNum + '.</div> ' +
-                            '<section class="content-txt"> ' +
+                            '<div class="content-txt"> ' +
                             '<p class="mean-bar">' + mean_cn + '</p> ' +
                             '<p class="mean-bar">' + mean_en + '</p> ';
                     if (obj.example != undefined && obj.example.length > 0) {
@@ -76,18 +86,21 @@
                         $.each(obj.example, function (idx1, obj1) {
                             exampleNum++;
                             wordContent += '<div class="example"> <div class="title-num">例' + exampleNum + ':</div> ' +
-                                    '<section class="content-txt"> ' +
-                                    '<p class="example-">'+obj1.tran+'</p> ' +
-                                    '<p>'+obj1.ex+'</p> </section> ' +
+                                    '<div class="content-txt"> ' +
+                                    '<p class="example-">' + obj1.tran + '</p> ' +
+                                    '<p>' + obj1.ex + '</p> </div> ' +
                                     '</div> ';
                         });
                     }
-                    wordContent += '</section> </li>';
+                    wordContent += '</div> </li>';
                 });
                 wordContent += '</ul>';
+                console.log(wordContent);
                 $('.j-word-content').html(wordContent);
                 //开启定时器
                 _this.startTime();
+                //自动播放音频
+                _this.playWord(wordName);
             },
             nextWord: function () {
                 var _this = this;
@@ -96,6 +109,9 @@
                 $('.j-not-know').removeClass('disable');
                 //重置进度条
                 progressBar.rest();
+                //停止音频
+                wordPlayer.stop();
+
                 if (currentNum >= (allWords.length + 1)) {
                     alert('over');
                 } else {
@@ -105,30 +121,17 @@
             startTime: function () {
                 //开启每个单词作答时间
                 var _this = this;
-                progressBar.start(function(obj){
+                progressBar.start(function (obj) {
                     //进行中
-                },function(obj){
+                }, function (obj) {
                     //结束 显示单词释义
                     _this.unKnow();
                 });
-                //时间显示
-                /*downTime.rest({
-                    cdTime: GdownTime,
-                    startCall: function (obj) {
-                        $('.j-time').text(obj.nowTime + '秒');
-
-                        $('.j-word-progress .j-bar').css('width',((1-(obj.nowTime/GdownTime))*100)+'%');
-
-                    },
-                    endCall: function (obj) {
-
-                    }
-                });*/
             },
-            unKnow:function(){
+            unKnow: function () {
                 $('.j-not-know').addClass('disable');
                 var unKnowWord = $('.j-word-name').text().trim();
-                if($.inArray( unKnowWord, unKnowWords )==-1){
+                if ($.inArray(unKnowWord, unKnowWords) == -1) {
                     unKnowWords.push(unKnowWord);
                 }
                 $('.j-word-content').fadeIn();
@@ -141,18 +144,21 @@
                 });
                 $('.j-not-know').bind('click', function () {
                     //我不会
-                    if($(this).hasClass('disable')){
+                    if ($(this).hasClass('disable')) {
                         return false;
                     }
                     progressBar.stop();
-                  _this.unKnow();
+                    _this.unKnow();
                 });
-                $('.j-word-head ').on('click','.j-play-word',function(){
-                    var word=$(this).attr('word').trim();
-                    var youdao_url = 'https://dict.youdao.com/speech?audio=' + word;
-                    wordPlayer.setting($(this),youdao_url);
-                    wordPlayer.play();
+                $('.j-word-head').on('click', '.j-play-word', function () {
+                    var word = $(this).attr('word').trim();
+                    _this.playWord(word);
                 });
+            },
+            playWord: function (word) {
+                var youdao_url = 'https://dict.youdao.com/speech?audio=' + word;
+                wordPlayer.setting($('.j-word-head .j-play-word'), youdao_url);
+                wordPlayer.play();
             }
         };
         learnWord.init();

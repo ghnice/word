@@ -16,6 +16,7 @@ player.prototype = {
                 _this.btn.text('播放中');
             },
             pause: function () {
+                _this.btn.text('播放');
             },
             ended: function () {
                 _this.btn.text('播放');
@@ -34,6 +35,10 @@ player.prototype = {
         var _this = this;
         _this.player.play();
 
+    },
+    stop:function(){
+        var _this=this;
+        _this.player.pause();
     }
 };
 

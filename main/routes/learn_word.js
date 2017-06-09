@@ -10,7 +10,7 @@ router.get('/',function(req,res){
 });
 
 router.post('/all_list_word',function(req,res){
-    collinsSq.find({},null,{},function(error,doc){
+    collinsSq.find({},null,{limit:20},function(error,doc){
         if(doc){
             res.send(200,{code:200,result:doc});
         }else{
