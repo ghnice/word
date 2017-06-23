@@ -1,88 +1,98 @@
-html{
-	font-size:61.4%;
+h1, h2, h3, h4, h5, h6 {
+  margin: 0;
+  padding: 0;
 }
 
-
-ul,ol{
-	list-style:none;
-	padding:0;
-	margin:0;
+ul, ol {
+  list-style: none;
+  margin: 0;
+  padding: 0;
 }
 
-$mainC:#0275d8;
-$aHover: #0275d8;
-
-body{
-  padding-top:8rem;
-}
-.header {
+body {
+  font-size: .12rem;
+  margin: 0;
   background-color:#f7f7f7;
-  padding-top:2rem;
-  padding-bottom:1.4rem;
-  .navbar-brand {
-    float: left;
-    font-size:2.8rem;
-    margin-top:-.8rem;
-  }
-  .navbar-toggle {
-    display: none;
-    float: right;
-
-    .icon {
-      font-size: 2.8rem;
-      color: #fff;
-      cursor: pointer;
-    }
-  }
-  .navbar-mask {
-    .navbar-nav {
-      display: block;
-      li {
-        float: left;
-        a {
-          color: #000;
-          font-size: 1.4rem;
-          font-weight: 700;
-          margin-left: 4rem;
-          text-transform: uppercase;
-          &:hover {
-            color: $aHover;
-          }
-        }
-      }
-    }
-  }
-
+  font-family: "Helvetica Neue",Helvetica,Arial,"Microsoft Yahei","Hiragino Sans GB","Heiti SC","WenQuanYi Micro Hei",sans-serif;;
 }
 
-@media (max-width: 768px) {
-  .header {
-    .navbar-brand {
-    }
-    .navbar-toggle {
-      display: block;
-    }
-    .navbar-mask {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background-color: rgba(0, 0, 0, .76);
-      display:table;
-      .navbar-nav {
-        display: table-cell;
-        vertical-align: middle;
-        li {
-          float: inherit;
-          text-align: center;
-          a {
-            margin: 0;
-            color: #fff;
-          }
-        }
-      }
-    }
+$yellow: rgb(240, 173, 78);
+$red: rgb(251, 107, 91);
+$dark: rgb(46, 62, 78);
+$darkDeep:#25313e;
+$redDeep:#fa5542;
+$txt:#717171;
+/*按钮*/
+@mixin btn {
+  display: inline-block;
+  padding: 0.24rem .40rem;
+  font-size: .22rem;
+  font-weight: normal;
+  text-align: center;
+  white-space: nowrap;
+  vertical-align: middle;
+  cursor: pointer;
+  background-image: none;
+  border: 0.01rem solid transparent;
+  border-radius: 0.04rem;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  -o-user-select: none;
+  user-select: none;
+}
 
+.btn-md {
+  font-size: .14rem;
+  min-width: 1.2rem;
+  line-height: 1.42857143;
+}
+
+.btn-sm {
+  padding: 0.05rem .1rem;
+  font-size: .12rem;
+  line-height: 1;
+  border-radius: 0.02rem;
+}
+
+.btn:active, .btn.active {
+  background-image: none;
+  outline: 0;
+  -webkit-box-shadow: inset 0 0.03rem 0.05rem rgba(0, 0, 0, 0.125);
+  box-shadow: inset 0 0.03rem 0.05rem rgba(0, 0, 0, 0.125);
+}
+
+.btn-round {
+  border-radius: 100px;
+}
+
+$default: #444359;
+$defaultBg: #fafafa;
+@mixin btn-setting($color,$bgColor,$borderColor,$shadowColor,$borderBottomColor) {
+  color: $color !important;
+  background-color: $bgColor;
+  border-color: $borderColor;
+  box-shadow: 0 0.1rem 0.1rem $shadowColor;
+  border-bottom-color: $borderBottomColor !important;
+  &:hover, &:focus, &:active {
+    /*  background-color: #ed9c28;
+      border-color: #d58512;*/
   }
+}
+
+.btn-red {
+  @include btn;
+  @include btn-setting(#ffffff, #fb6b5b, #fb6b5b, rgba(90, 90, 90, 0.1),rgba(45,44,65,0.3));
+}
+
+.btn-dark {
+  @include btn;
+  @include btn-setting(#ffffff, #2e3e4e, #2e3e4e, rgba(90, 90, 90, 0.1),rgba(45,44,65,0.3));
+}
+.btn-yellow{
+  @include btn;
+  @include btn-setting(#ffffff, f0ad4e, #eea236, rgba(90, 90, 90, 0.1),rgba(45,44,65,0.3));
+}
+.disable{
+  opacity: 0.6;
 }

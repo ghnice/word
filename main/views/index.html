@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title><%= title %></title>
+    <script src="/introduce/view_adapter.js"></script>
+    <link href="/css/index.css" type="text/css" rel="stylesheet">
+</head>
+<body>
+<!--进来后获取所有教材,显示称列表,因为目前只有一本教材所以暂时写死-->
+<ul>
+    <li><span class="btn-dark">collins</span></li>
+
+</ul>
+<div class="plan">
+    <h3 class="title">创建计划</h3>
+    <ol class="result">
+        <li>
+            当前选择教材:<b>collins</b>(共<span class="j-words-sum"></span>)
+        </li>
+
+        <li>
+            预计完成时间: <span class="j-over-time"></span>
+        </li>
+        <li>
+            需要<span class="j-days"></span>天完成
+        </li>
+    </ol>
+    <ul class="editor">
+        <li><label>每天单词量:</label>
+            <select class="form-select j-select-words">
+                <option value="10">10</option>
+                <option value="20">20</option>
+                <option value="30">30</option>
+                <option value="40" selected="selected">40</option>
+                <option value="50">50</option>
+                <option value="60">60</option>
+                <option value="70">70</option>
+                <option value="80">80</option>
+                <option value="90">90</option>
+                <option value="100">100</option>
+            </select>
+        </li>
+    </ul>
+    <span class="btn-dark j-plan-submit">开始</span>
+</div>
+<script src="/introduce/jQuery-3.1.1.js"></script>
+<script src="/js/tool.js"></script>
+<script>
+    jQuery(function ($) {
+        var allWords = '';
+        var surplusWords = '';
+        var wordNum = 0;//设置中每天的单词量
+        var plan = {
+            init: function () {
+                this.getList();
+                this.bindEvent();
+            },
+            checkLocalData: function () {
+                var _this = this;
+                if (localStorage.collinsWordList) {
+                    allWords = JSON.parse(localStorage.collinsWordList);
+                    _this.settingTime();
+                } else {
+                }
+            },
+            settingTime: function () {
+                wordNum = parseInt($('.j-select-words').val());
+                var days = Math.ceil(allWords.length / wordNum);
+                var todayTime = new Date().getTime();
+                var overTime = new Date(todayTime + days * 24 * 60 * 60 * 1000).Format('yyyy年MM月dd日');
+                $('.j-over-time').text(overTime);
+                $('.j-days').text(days);
+                $('.j-words-sum').text(allWords.length + '个单词');
+            },
+            getList: function () {
+                var _this = this;
+                $.post('/learn_word/all_list_word', function (data) {
+                    console.log(data);
+                    if (data.code == 200) {
+                        allWords = data.result;
+                        localStorage.collinsWordList = JSON.stringify(allWords);
+                        _this.settingTime();
+                    } else {
+                        alert('获取数据失败');
+                    }
+                });
+            },
+            userSetting: function () {
+                //本次需要背诵的单词
+                var currentWords = allWords.splice(0, wordNum);
+                var setting = {wordNum: wordNum, currentWords: currentWords};
+                localStorage.userSetting = JSON.stringify(setting);
+            },
+            bindEvent: function () {
+                var _this = this;
+                $('.j-select-words').change(function () {
+                    _this.settingTime();
+                });
+                $('.j-plan-submit').bind('click', function () {
+                    _this.userSetting();
+                    window.location.href = '/learn_word';
+                });
+            }
+        };
+        plan.init();
+    });
+</script>
+</body>
+</html>

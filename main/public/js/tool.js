@@ -135,3 +135,51 @@ var downTime = {
         }
     }
 };
+
+//正计时
+function timer(){
+    this.timer=null;
+    this.sum=0;
+}
+timer.prototype={
+      start:function(){
+          var _this=this;
+          clearInterval(_this.timer);
+          _this.timer=setInterval(function () {
+              _this.sum++;
+          },1000);
+      },
+    stop:function(callback){
+        var _this=this;
+        clearInterval(_this.timer);
+        _this._isCallback(callback);
+
+    },
+    rest:function(){
+        var _this=this;
+        clearInterval(_this.timer);
+        _this.sum=0;
+    },
+    _isCallback:function(callback){
+        if (callback && $.isFunction(callback)) {
+            callback(this);
+        }
+    }
+};
+
+//日期格式化
+Date.prototype.Format = function (fmt) { //
+    var o = {
+        "M+": this.getMonth() + 1, //月份
+        "d+": this.getDate(), //日
+        "H+": this.getHours(), //小时
+        "m+": this.getMinutes(), //分
+        "s+": this.getSeconds(), //秒
+        "q+": Math.floor((this.getMonth() + 3) / 3), //季度
+        "S": this.getMilliseconds() //毫秒
+    };
+    if (/(y+)/.test(fmt)) fmt = fmt.replace(RegExp.$1, (this.getFullYear() + "").substr(4 - RegExp.$1.length));
+    for (var k in o)
+        if (new RegExp("(" + k + ")").test(fmt)) fmt = fmt.replace(RegExp.$1, (RegExp.$1.length == 1) ? (o[k]) : (("00" + o[k]).substr(("" + o[k]).length)));
+    return fmt;
+};

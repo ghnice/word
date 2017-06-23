@@ -6,14 +6,32 @@
     <link href="/css/learn_word.css" type="text/css" rel="stylesheet">
 </head>
 <body>
-<div class="word-head j-word-head"></div>
-<div class="j-time"></div>
-<div class="word-progress j-word-progress">
-    <div class="progress-bar j-bar"></div>
+<div class="recite-word j-recite-word">
+    <div class="word-head ">
+        <div class="j-word-head"></div>
+    </div>
+    <div class="j-time"></div>
+    <div class="word-progress j-word-progress">
+        <div class="progress-bar j-bar"></div>
+    </div>
+    <p class="word-count"><span class="j-word-count">qw/12</span></p>
+    <div class="word-content j-word-content">
+    </div>
+    <div class="footer-btn"><span class="btn-red j-not-know">不认识</span><span class="j-know btn-dark">下一个</span></div>
 </div>
-<div class="word-content j-word-content">
+
+
+<div class="result-page ">
+    <div class="main j-result-page">
+        <h3>本次成绩</h3>
+        <ul class="j-result-content result-content">
+
+        </ul>
+    </div>
+
 </div>
-<div class="footer-btn"><span class="btn-red j-not-know">不认识</span><span class="j-know btn-dark">下一个</span></div>
+
+
 <audio id="player" src="">您的浏览器不支持h5 audio,建议升级您的浏览器</audio>
 
 
@@ -25,10 +43,12 @@
         var currentNum = 1;//当前渲染第几个单词
         var unKnowWords = [];//不认识的单词集合
         var cdTime = 2;//每个单词持续的时间(s)
+        var wordGroup = [];//当前正在练习的单词组,不会的会重新背诵,所以
         var wordPlayer = new player({
             dom: $('#player')
         });
-        var progressBar = new progress($('.j-word-progress .j-bar'), cdTime);
+        var progressBar = new progress($('.j-word-progress .j-bar'), cdTime);//初始化进度条
+        var sumTimer = new timer();
         var learnWord = {
             init: function () {
                 this.getList();
@@ -36,29 +56,48 @@
             },
             getList: function () {
                 var _this = this;
-                $.post('/learn_word/all_list_word', function (data) {
-                    console.log(data);
-                    if (data.code == 200) {
-                        allWords = data.result;
-                        _this.renderCurrentWord();
-                    } else {
-                        alert('获取数据失败');
-                    }
-                });
+                /*   $.post('/learn_word/all_list_word', function (data) {
+                 console.log(data);
+                 if (data.code == 200) {
+                 allWords = data.result;
+                 _this.renderCurrentWord();
+                 } else {
+                 alert('获取数据失败');
+                 }
+                 });*/
+                if (localStorage.userSetting) {
+                    allWords = JSON.parse(localStorage.userSetting).currentWords;
+                    wordGroup = allWords;
+                    _this.renderCurrentWord();
+                    sumTimer.rest();
+                    sumTimer.start();
+                } else {
+                    alert('获取数据失败!');
+                }
+            },
+            rest:function(){
+                var _this=this;
+                $('.j-result-page').hide();
+                $('.j-recite-word').show();
+                currentNum = 1;
+                unKnowWords = [];
+                sumTimer.rest();
+                sumTimer.start();
+                _this.renderCurrentWord();
             },
             renderCurrentWord: function () {
                 var _this = this;
                 //渲染单词
-                var currentWord = allWords[currentNum - 1];
+
+                var currentWord = wordGroup[currentNum - 1];
                 var wordName = currentWord["head-word"].attribute.search;
                 var wordPron = (currentWord["head-word"].pron == undefined ? "sorry  尚无音标" : currentWord["head-word"].pron + '<span class="j-play-word" word="' + wordName + '">播放</span>');
-                var headStr = '<h3 class="word-name j-word-name">' + wordName + '</h3>' +
+                var headStr = '<textarea hidden="hidden" id="currentWord"  >' + JSON.stringify(wordGroup[currentNum - 1]) + '</textarea><h3 class="word-name j-word-name">' + wordName + '</h3>' +
                         '<p class="word-pron">' + wordPron + '</p>';
                 $('.j-word-head').html(headStr);
                 //渲染释义
                 var contentWordAry = currentWord["head-word"].word.split('|');
                 var wordStr = '';
-                console.log(contentWordAry);
                 if (contentWordAry.length == 1) {
                     wordStr = contentWordAry[0];
                 } else {
@@ -67,14 +106,13 @@
                         wordStr += '<b class="word-group word-group-' + count + '">' + contentWordAry[i] + '</b>';
                     }
                 }
-
+                //内容区
                 var wordContent = '<h4 class="word-header">' + wordStr + '</h4><ul class="main">';
                 var senseNum = 0;
                 $.each(currentWord.sense, function (idx, obj) {
                     senseNum++;
                     var mean_cn = (obj.tran == undefined ? '_' : obj.tran);
                     var mean_en = (obj.def == undefined ? "_" : obj.def["_"]);
-
                     wordContent +=
                             '<li class="sense"> ' +
                             '<div class="title-num">' + senseNum + '.</div> ' +
@@ -95,8 +133,8 @@
                     wordContent += '</div> </li>';
                 });
                 wordContent += '</ul>';
-                console.log(wordContent);
                 $('.j-word-content').html(wordContent);
+                $('.j-word-count').html(currentNum + '/' + wordGroup.length);
                 //开启定时器
                 _this.startTime();
                 //自动播放音频
@@ -112,11 +150,62 @@
                 //停止音频
                 wordPlayer.stop();
 
-                if (currentNum >= (allWords.length + 1)) {
-                    alert('over');
+                if (currentNum >= (wordGroup.length + 1)) {
+                    _this.resultPage();//点击结束后显示结果页面
                 } else {
                     _this.renderCurrentWord();
+                    if (currentNum == (wordGroup.length )) {
+                        $('.j-know').text('结束');
+                    } else {
+
+                    }
+
                 }
+            },
+            resultPage: function () {
+                var _this = this;
+                $('.j-result-page').show();
+                $('.j-recite-word').hide();
+                var useTime = '';
+                sumTimer.stop(function (obj) {
+                    useTime = obj.sum;
+                });
+                var sum = allWords.length;
+                var unSum = unKnowWords.length;
+                var cent = ((sum - unSum) / sum * 100).toFixed(1);
+
+                var resultStr = '<li>\
+                不认识的单词数量:<span class="j-result-correct">' + unSum + '</span>\
+                </li>\
+                <li>\
+                认识的单词数量:<span class="j-result-wrong">' + sum + '</span>\
+                </li>\
+                <li>\
+                识词率:<span class="j-result-accuracy">' + cent + '%</span>\
+                </li>\
+                <li>\
+                用时:<span class="j-result-useTime">' + useTime + '</span>\
+                </li>';
+                var go_on_btn = (unKnowWords.length > 0 ? '<span class="j-go-on">继续背诵</span>' : '');
+                var buttonStr = '<div>' + go_on_btn + '</div>';
+                resultStr += buttonStr;
+                $('.j-result-content').html(resultStr);
+                $('.j-go-on').unbind();
+                $('.j-go-on').bind('click', function () {
+                    wordGroup=unKnowWords;
+                    console.log(wordGroup);
+                    _this.rest();
+
+                });
+                /*    if (unKnowWords.length >= 1) {
+                 wordGroup = unKnowWords;
+                 currentNum = 1;
+                 console.log(wordGroup);
+                 // _this.renderCurrentWord();
+                 } else {
+                 //结束
+                 alert('over');
+                 }*/
             },
             startTime: function () {
                 //开启每个单词作答时间
@@ -130,8 +219,9 @@
             },
             unKnow: function () {
                 $('.j-not-know').addClass('disable');
-                var unKnowWord = $('.j-word-name').text().trim();
+                var unKnowWord = JSON.parse($('#currentWord').val());
                 if ($.inArray(unKnowWord, unKnowWords) == -1) {
+                    //如果不认识存起来
                     unKnowWords.push(unKnowWord);
                 }
                 $('.j-word-content').fadeIn();
@@ -154,6 +244,16 @@
                     var word = $(this).attr('word').trim();
                     _this.playWord(word);
                 });
+                function contains(arr, obj) {
+                    //while
+                    var i = arr.length;
+                    while (i--) {
+                        if (arr[i]['_id'] === obj['_id']) {
+                            return i;
+                        }
+                    }
+                    return -1;
+                }
             },
             playWord: function (word) {
                 var youdao_url = 'https://dict.youdao.com/speech?audio=' + word;
