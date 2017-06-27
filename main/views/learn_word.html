@@ -14,7 +14,7 @@
     <div class="word-progress j-word-progress">
         <div class="progress-bar j-bar"></div>
     </div>
-    <p class="word-count"><span class="j-word-count">qw/12</span></p>
+    <p class="word-count j-word-count"></p>
     <div class="word-content j-word-content">
     </div>
     <div class="footer-btn"><span class="btn-red j-not-know">不认识</span><span class="j-know btn-dark">下一个</span></div>
@@ -39,11 +39,13 @@
 <script src="/js/tool.js"></script>
 <script>
     jQuery(function ($) {
-        var allWords = [];//存放当前所有单词数据
+        var allWords = [];//存储所有单词
         var currentNum = 1;//当前渲染第几个单词
         var unKnowWords = [];//不认识的单词集合
         var cdTime = 2;//每个单词持续的时间(s)
         var wordGroup = [];//当前正在练习的单词组,不会的会重新背诵,所以
+        var currentGroup = 1;//当前正在第几组(天);
+        var wordNum;//一共需要的天数
         var wordPlayer = new player({
             dom: $('#player')
         });
@@ -66,8 +68,12 @@
                  }
                  });*/
                 if (localStorage.userSetting) {
-                    allWords = JSON.parse(localStorage.userSetting).currentWords;
-                    wordGroup = allWords;
+
+                    allWords = JSON.parse(localStorage.userSetting).allWords;
+                    wordNum = JSON.parse(localStorage.userSetting).wordNum;
+
+                    _this.checkLocalData();
+                    _this.getCurrentWordGroup();
                     _this.renderCurrentWord();
                     sumTimer.rest();
                     sumTimer.start();
@@ -75,8 +81,23 @@
                     alert('获取数据失败!');
                 }
             },
-            rest:function(){
+            checkLocalData:function(){
                 var _this=this;
+                if(localStorage.learnWord){
+                    currentGroup=JSON.parse(localStorage.learnWord).groupNum;
+                }else{
+                    currentGroup = 1;//默认为第一组
+                };
+            },
+            getCurrentWordGroup: function () {
+                //获取当前的单词组
+                var start = (currentGroup - 1) * wordNum;
+                var end = currentGroup * wordNum;
+                wordGroup = allWords.slice(start, end);
+                console.log(start+'/'+ end);
+            },
+            rest: function () {
+                var _this = this;
                 $('.j-result-page').hide();
                 $('.j-recite-word').show();
                 currentNum = 1;
@@ -134,7 +155,8 @@
                 });
                 wordContent += '</ul>';
                 $('.j-word-content').html(wordContent);
-                $('.j-word-count').html(currentNum + '/' + wordGroup.length);
+                //当前组及数量统计
+                $('.j-word-count').html('<span>'+currentGroup+'</span> <span>'+currentNum + '/' + wordGroup.length+'</span>');
                 //开启定时器
                 _this.startTime();
                 //自动播放音频
@@ -170,32 +192,36 @@
                 sumTimer.stop(function (obj) {
                     useTime = obj.sum;
                 });
-                var sum = allWords.length;
+                var sum = wordGroup.length;
                 var unSum = unKnowWords.length;
                 var cent = ((sum - unSum) / sum * 100).toFixed(1);
 
-                var resultStr = '<li>\
-                不认识的单词数量:<span class="j-result-correct">' + unSum + '</span>\
-                </li>\
-                <li>\
-                认识的单词数量:<span class="j-result-wrong">' + sum + '</span>\
-                </li>\
-                <li>\
-                识词率:<span class="j-result-accuracy">' + cent + '%</span>\
-                </li>\
-                <li>\
-                用时:<span class="j-result-useTime">' + useTime + '</span>\
-                </li>';
-                var go_on_btn = (unKnowWords.length > 0 ? '<span class="j-go-on">继续背诵</span>' : '');
+                var resultStr =
+                        '<li>不认识的单词数量:<span class="j-result-correct">' + unSum + '</span></li>\
+                <li>本次认识的单词数量:<span class="j-result-wrong">' + sum + '</span></li>\
+                <li>识词率:<span class="j-result-accuracy">' + cent + '%</span></li>\
+                <li>用时:<span class="j-result-useTime">' + useTime + '</span></li>';
+                var go_on_btn = '';
+                if (unKnowWords.length > 0) {
+                    go_on_btn = '<p>背诵完此组才能解锁下一组</p><span class="j-go-on">继续背诵</span>';
+                } else {
+                    go_on_btn = '<p>已成功解锁下一组</p><span class="j-next-group">进入下一组</span>'
+                }
                 var buttonStr = '<div>' + go_on_btn + '</div>';
                 resultStr += buttonStr;
                 $('.j-result-content').html(resultStr);
                 $('.j-go-on').unbind();
                 $('.j-go-on').bind('click', function () {
-                    wordGroup=unKnowWords;
-                    console.log(wordGroup);
+                    //继续本组背诵
+                    wordGroup = unKnowWords;
                     _this.rest();
 
+                });
+                $('.j-next-group').unbind();
+                $('.j-next-group').bind('click', function () {
+                    alert('进入下一组');
+                    localStorage.learnWord=JSON.stringify({groupNum:(currentGroup+1)});
+                    window.location.reload();
                 });
                 /*    if (unKnowWords.length >= 1) {
                  wordGroup = unKnowWords;

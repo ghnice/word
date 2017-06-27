@@ -48,7 +48,7 @@
 <script src="/js/tool.js"></script>
 <script>
     jQuery(function ($) {
-        var allWords = '';
+        var allWords = '';//存储所有单词
         var surplusWords = '';
         var wordNum = 0;//设置中每天的单词量
         var plan = {
@@ -89,7 +89,7 @@
             userSetting: function () {
                 //本次需要背诵的单词
                 var currentWords = allWords.splice(0, wordNum);
-                var setting = {wordNum: wordNum, currentWords: currentWords};
+                var setting = {wordNum: wordNum, currentWords: currentWords,allWords:allWords,groupSum:Math.ceil(allWords.length / wordNum)};
                 localStorage.userSetting = JSON.stringify(setting);
             },
             bindEvent: function () {
