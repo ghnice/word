@@ -1,23 +1,36 @@
 @import "public";
-body{
-  font-size:.26rem;
+
+body {
+  font-size: .26rem;
 }
 
-.form-select{
-  font-size:.26rem;
+.form-select {
+  font-size: .26rem;
 }
 
-.plan{
-  text-align:center;
+.select-book {
+  display: none;
+}
 
-  .title{
-    font-size:.45rem;
-    margin:.1rem 0;
-  }
-  .result{
+.plan {
+  display: none;
+  .plan-content {
+    position: relative;
+    text-align: center;
+    .plan-close {
+      position:absolute;
+      top:.06rem;
+      right:.08rem;
+    }
+    .title {
+      font-size: .45rem;
+      margin: .1rem 0;
+    }
+    .result {
 
-  }
-  .editor{
-      margin:.26rem 0 .2rem;
+    }
+    .editor {
+      margin: .26rem 0 .2rem;
+    }
   }
 }

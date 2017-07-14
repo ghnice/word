@@ -1,0 +1,41 @@
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title><%= title %></title>
+    <script src="/introduce/view_adapter.js"></script>
+    <link href="/css/plan_list.css" type="text/css" rel="stylesheet">
+</head>
+<body>
+<div class="list-main">
+    <ul class="content j-list">
+
+    </ul>
+</div>
+
+
+<script src="/introduce/jQuery-3.1.1.js"></script>
+<script src="/js/tool.js"></script>
+<script>
+    jQuery(function ($) {
+        var planList = {
+            init: function () {
+                this.getList();
+            },
+            getList: function () {
+                if (localStorage.learnWord) {
+                    var listData = JSON.parse(localStorage.learnWord);
+                    var str = '<li>\
+                            <h3>'+listData.book+'</h3>\
+                            <p>当前已进行到第'+listData.groupNum+'天,一共需要'+listData.surplusDay+'天</p>\
+                            </li>';
+                    $('.j-list').html(str);
+                } else {
+                    alert('获取计划列表失败');
+                }
+            }
+        };
+        planList.init();
+    });
+</script>
+</body>
+</html>

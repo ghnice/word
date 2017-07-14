@@ -44,8 +44,9 @@
         var unKnowWords = [];//不认识的单词集合
         var cdTime = 2;//每个单词持续的时间(s)
         var wordGroup = [];//当前正在练习的单词组,不会的会重新背诵,所以
-        var currentGroup = 1;//当前正在第几组(天);
-        var wordNum;//一共需要的天数
+        var currentGroup = 1;//当天应该背第几组;
+        var everyDaysWord;//每天应该背诵的单词数
+        var needAllDays;//一共需要的天数
         var wordPlayer = new player({
             dom: $('#player')
         });
@@ -68,11 +69,15 @@
                  }
                  });*/
                 if (localStorage.userSetting) {
-
+                    //从后台获取单词,计划,和当前进度(背到第几组);
                     allWords = JSON.parse(localStorage.userSetting).allWords;
-                    wordNum = JSON.parse(localStorage.userSetting).wordNum;
-
-                    _this.checkLocalData();
+                    everyDaysWord = JSON.parse(localStorage.userSetting).wordNum;
+                    needAllDays=JSON.parse(localStorage.userSetting).groupSum;
+                    if(localStorage.learnWord){
+                        currentGroup=JSON.parse(localStorage.learnWord).groupNum;
+                    }else{
+                        currentGroup = 1;//默认为第一组
+                    }
                     _this.getCurrentWordGroup();
                     _this.renderCurrentWord();
                     sumTimer.rest();
@@ -81,22 +86,16 @@
                     alert('获取数据失败!');
                 }
             },
-            checkLocalData:function(){
-                var _this=this;
-                if(localStorage.learnWord){
-                    currentGroup=JSON.parse(localStorage.learnWord).groupNum;
-                }else{
-                    currentGroup = 1;//默认为第一组
-                };
-            },
+
             getCurrentWordGroup: function () {
-                //获取当前的单词组
-                var start = (currentGroup - 1) * wordNum;
-                var end = currentGroup * wordNum;
+                //获取当前用户所需的单词组
+                var start = (currentGroup - 1) * everyDaysWord;
+                var end = currentGroup * everyDaysWord;
                 wordGroup = allWords.slice(start, end);
                 console.log(start+'/'+ end);
             },
             rest: function () {
+                //继续背诵本组时需要重置参数
                 var _this = this;
                 $('.j-result-page').hide();
                 $('.j-recite-word').show();
@@ -215,12 +214,12 @@
                     //继续本组背诵
                     wordGroup = unKnowWords;
                     _this.rest();
-
                 });
                 $('.j-next-group').unbind();
                 $('.j-next-group').bind('click', function () {
                     alert('进入下一组');
-                    localStorage.learnWord=JSON.stringify({groupNum:(currentGroup+1)});
+                    //需保存当前数据到数据库,记录进度用户id,单词书,当前到第几组
+                    localStorage.learnWord=JSON.stringify({groupNum:(currentGroup+1),book:'collins',surplusDay:needAllDays});
                     window.location.reload();
                 });
                 /*    if (unKnowWords.length >= 1) {
